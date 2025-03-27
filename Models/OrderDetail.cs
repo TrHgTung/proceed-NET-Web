@@ -6,20 +6,21 @@ namespace webapp.Models{
     public class OrderDetail
     {
         [Key]
-        public int RowDetailID { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid RowDetailID { get; set; } // OrderDetail khoa chinh
 
-        public int OrderMasterID { get; set; }
+        public Guid OrderMasterID { get; set; }
 
         [MaxLength(20)]
-        public string LineNumber { get; set; }
+        public int LineNumber { get; set; }
 
         public string ItemID { get; set; }
 
-        public int Quantity { get; set; }
+        public float Quantity { get; set; }
 
         public float Price { get; set; }
         
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
 
     }
 }

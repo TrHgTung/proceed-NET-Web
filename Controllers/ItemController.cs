@@ -13,29 +13,42 @@ using System.Text.Json.Serialization;
 
 namespace webapp.Controllers
 {
-    // [Route("api/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class DashboardController : Controller
+    public class ItemController : Controller
     {
         private readonly DataContext _context;
-        private readonly IConfiguration _config;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public DashboardController(DataContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public ItemController(DataContext context)
         {
             _context = context;
-            _config = configuration;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
-        [Route("api/Customers")]
-        public async Task<ActionResult<IEnumerable<CustomerList>>> GetAllCustomerInfo()
+        // [Route("api/Items")]
+        public async Task<ActionResult<IEnumerable<ItemList>>> GetAllItems()
         {
-            var getAllCustomers = await _context.CustomerLists.ToListAsync();
+            var getAllHangHoa = await _context.ItemLists.ToListAsync();
+            if (getAllHangHoa == null){
+                return NotFound();
+            }
           
             return Ok(new { 
-                getAllCustomers = getAllCustomers
+                getAllHangHoa = getAllHangHoa
+            });
+        }
+
+        [HttpGet("{itemId}")]
+        // [Route("api/Items")]
+        public async Task<ActionResult<IEnumerable<ItemList>>> GetAllItems(string itemId)
+        {
+            var getAHangHoa = await _context.ItemLists.FindAsync(itemId);
+            if (getAHangHoa == null){
+                return NotFound();
+            }
+          
+            return Ok(new { 
+                getAHangHoa = getAHangHoa
             });
         }
 

@@ -6,6 +6,7 @@ namespace webapp.Models{
     public class CustomerList
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string CustomerID { get; set; }
 
         [MaxLength(255)]

@@ -6,6 +6,7 @@ namespace webapp.Models{
     public class ItemList
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string ItemID { get; set; }
 
         [MaxLength(255)]

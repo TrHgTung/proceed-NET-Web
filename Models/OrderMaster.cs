@@ -6,17 +6,18 @@ namespace webapp.Models{
     public class OrderMaster
     {
         [Key]
-        public int OrderMasterID { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid OrderMasterID { get; set; }
 
         [MaxLength(20)]
-        public string OrderDate { get; set; }
+        public DateTime OrderDate { get; set; }
 
-        public int OrderNo { get; set; }
+        public string OrderNo { get; set; }
 
         [MaxLength(255)]
         public string CustomerID { get; set; }
 
-        public float TotalAmount { get; set; }
+        public decimal TotalAmount { get; set; }
         
         public string DivSubID { get; set; }
 
