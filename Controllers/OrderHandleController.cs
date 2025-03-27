@@ -41,12 +41,12 @@ namespace webapp.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateOrder([FromForm] OrderDto orderDto)
         {
+            string divSubId = "0903705820";
             if (orderDto == null || orderDto.Amount == 0)
             {
                 return BadRequest("Dữ liệu không hợp lệ");
             }
-            int getLineNumber = 0;
-            getLineNumber = _context.OrderDetails.Count() + 1;
+            int getLineNumber = _context.OrderDetails.Count() + 1;
 
             var orderDetail = new OrderDetail
             {
@@ -57,30 +57,30 @@ namespace webapp.Controllers
                 Amount = orderDto.Amount
             };
 
-            // string getCurrentDateTime = DateTime.UtcNow.ToString("yyyy-MM-dd");
-            string getCurrentDateTime = DateTime.UtcNow;
+            var getCurrentDateTime = DateTime.UtcNow;
             // DateTime getCurrentDateTime = DateTime.UtcNow.Date;
-            // getCurrentDateTime.ToString("dd/MM/yyyy");
-            var getOrderNo = ((_context.OrderMasters.Max(o => (int?)o.OrderNo) ?? 0) + 1).ToString();
-            decimal totalAmt = orderDto.TotalAmount;
+            // var getOrderNo = ((_context.OrderMasters.Max(o => (int?)o.OrderNo) ?? 0) + 1).ToString();
+            Random rnd = new Random();
+            var randomNumber  = rnd.Next(11111, 99999);  
+            var getOrderNo = "ORDERNO" + randomNumber.ToString();
+
             var oderMaster = new OrderMaster
             {
                 OrderDate = getCurrentDateTime,
                 OrderNo = getOrderNo,
                 CustomerID = orderDto.CustomerID,
-                TotalAmount = totalAmt,
-                DivSubID = "0903705820"
+                TotalAmount = orderDto.TotalAmount,
+                DivSubID = divSubId
             };
 
             _context.OrderMasters.Add(oderMaster);
-            _context.OrderDetails.Add(orderDetail);
-           
             await _context.SaveChangesAsync();
 
-            // return CreatedAtAction(nameof(GetOrders),
-            //     new {
-            //         id = order.OrderMasterID
-            //     }, order);
+            orderDetail.OrderMasterID = oderMaster.OrderMasterID;
+
+            _context.OrderDetails.Add(orderDetail);
+            await _context.SaveChangesAsync();
+
             return Ok(new {
                 orderDetail = orderDetail,
                 oderMaster = oderMaster,
@@ -88,15 +88,35 @@ namespace webapp.Controllers
             });
         }
 
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> UpdateOrder(int id, OrderMaster order)
-        // {
-        //     if (id != order.OrderMasterID)
-        //         return BadRequest();
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(Guid id, [FromForm] UpdateDTO updtDto)
+        {
+            var checkOrderMaster = await _context.OrderMasters.FindAsync(id);
+            if (id != order.OrderMasterID || checkOrderMaster == null){
+                return BadRequest();
+            }
 
-        //     _context.Entry(order).State = EntityState.Modified;
-        //     await _context.SaveChangesAsync();
-        //     return NoContent();
-        // }
+            // var oderMaster = new OrderMaster
+            // {
+            //     OrderDate = getCurrentDateTime,
+            //     OrderNo = getOrderNo,
+            //     CustomerID = orderDto.CustomerID,
+            //     TotalAmount = orderDto.TotalAmount,
+            //     DivSubID = divSubId
+            // };
+            checkOrderMaster.OrderDate = orderMaster.OrderDate;
+            checkOrderMaster.OrderNo = orderMaster.OrderNo;
+            checkOrderMaster.CustomerID = orderMaster.CustomerID;
+            checkOrderMaster.TotalAmount = orderMaster.TotalAmount;
+            checkOrderMaster.DivSubID = orderMaster.DivSubID;
+
+            _context.OrderMasters.Add(oderMaster);
+            await _context.SaveChangesAsync();
+
+
+            _context.Entry(order).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
