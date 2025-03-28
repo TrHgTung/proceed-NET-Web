@@ -10,6 +10,7 @@ using webapp.Models;
 using webapp.Dto;
 using Microsoft.AspNetCore.JsonPatch;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
 
 namespace webapp.Controllers
 {
@@ -18,10 +19,12 @@ namespace webapp.Controllers
     public class OrderHandleController : Controller
     {
         private readonly DataContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public OrderHandleController(DataContext context)
+        public OrderHandleController(DataContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -39,7 +42,86 @@ namespace webapp.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateOrder([FromForm] OrderDto orderDto)
+        [Route("init")]
+        public async Task<ActionResult> InitOrderMaster(IHttpContextAccessor httpContextAccessor)
+        {
+            var initGuid = Guid.NewGuid();
+            var initOrderMaster = new OrderMaster
+            {
+                OrderMasterID = initGuid,
+                OrderDate = DateTime.UtcNow,
+                OrderNo = "0",
+                CustomerID = "0",
+                TotalAmount = 0,
+                DivSubID = "0903705820"
+            };
+
+            var currentOrderMasterID = _httpContextAccessor.HttpContext.Session;
+            currentOrderMasterID.SetString("CurrentOrderMasterID", initGuid.ToString());
+
+            _context.OrderMasters.Add(initOrderMaster);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Đã khởi tạo OrderMaster",
+                orderMaster = initOrderMaster
+            });
+        }
+
+        [HttpPost]
+         [Route("add")]
+        public async Task<ActionResult> CreateSingleOrderLine([FromForm] CreateDTO.OrderDetail orderDto, IHttpContextAccessor httpContextAccessor)
+        {
+            var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
+            if (currentOrderMasterID == null)
+            {
+                return BadRequest("Có lỗi hệ thống");
+            }
+            int getLineNumber = _context.OrderDetails.Count() + 1;
+
+            var orderDetail = new OrderDetail
+            {
+                OrderMasterID = Guid.Parse(currentOrderMasterID),
+                LineNumber = getLineNumber,
+                ItemID = (orderDto.ItemID), // lay tu giao dien UI
+                Quantity = orderDto.Quantity, // lay tu giao dien
+                Price = orderDto.Price, // lay tu giao dien
+                Amount = (decimal)(orderDto.Quantity * orderDto.Price) // tu dong tinh
+            };
+
+            // var getCurrentDateTime = DateTime.UtcNow.Date;
+            // Random rnd = new Random();
+            // var randomNumber  = rnd.Next(11111, 99999);  
+            // var getOrderNo = "ORDERNO" + randomNumber.ToString();
+
+            // var oderMaster = new OrderMaster
+            // {
+            //     OrderDate = getCurrentDateTime,
+            //     OrderNo = getOrderNo,
+            //     CustomerID = orderDto.CustomerID,
+            //     TotalAmount = orderDto.TotalAmount,
+            //     DivSubID = divSubId
+            // };
+
+            // _context.OrderMasters.Add(oderMaster);
+            // await _context.SaveChangesAsync();
+
+            // orderDetail.OrderMasterID = oderMaster.OrderMasterID;
+
+            _context.OrderDetails.Add(orderDetail);
+            await _context.SaveChangesAsync();
+
+            return Ok(new {
+                orderDetail = orderDetail,
+                // oderMaster = oderMaster,
+                msg = "Đã thêm sản phẩm vào hàng chờ cua hóa đơn"
+            });
+        }
+
+        [HttpPost]
+         [Route("submit")]
+        public async Task<ActionResult> CreateOrderSubmit([FromForm] CreateDTO.OrderMaster orderDto)
         {
             string divSubId = "0903705820";
             if (orderDto == null || orderDto.Amount == 0)
@@ -58,8 +140,6 @@ namespace webapp.Controllers
             };
 
             var getCurrentDateTime = DateTime.UtcNow.Date;
-            // DateTime getCurrentDateTime = DateTime.UtcNow.Date;
-            // var getOrderNo = ((_context.OrderMasters.Max(o => (int?)o.OrderNo) ?? 0) + 1).ToString();
             Random rnd = new Random();
             var randomNumber  = rnd.Next(11111, 99999);  
             var getOrderNo = "ORDERNO" + randomNumber.ToString();

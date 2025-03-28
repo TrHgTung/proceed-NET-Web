@@ -52,33 +52,5 @@ namespace webapp.Controllers
             });
         }
 
-        // [HttpGet]
-        // [Route("answer/edit/{questionId}")]
-        // [Authorize(Policy = "AdminPolicy")]
-        // public async Task<ActionResult<IEnumerable<Questions>>> GetQuestion(int questionId)
-        // {
-        //     var userId = HttpContext.Session.GetString("LecturerEmail");
-
-        //     if (string.IsNullOrEmpty(userId))
-        //     {
-        //         return Unauthorized("Yêu cầu xác thực giảng viên");
-        //     }
-          
-        //     var getAnswersByQuestionId = await _context.Answer
-        //                 .Where(a => a.QuestionId == questionId)
-        //                 .Select(a => new {
-        //                         a.Id,
-        //                         a.AnswerContent,
-        //                         a.AnswerImage
-        //                     })
-        //                 .ToListAsync();
-
-        //     return Ok(new { 
-        //         userId = userId,
-        //         getFourAnswersByQuestionId = getAnswersByQuestionId,
-        //     });
-        // }
-
-        
     }
 }

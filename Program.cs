@@ -18,12 +18,13 @@ builder.Services.AddCors(options =>
                       });
 });
 
-// builder.Services.AddSession(options =>
-// {
-//     options.IdleTimeout = TimeSpan.FromHours(6);
-//     options.Cookie.HttpOnly = true;
-//     options.Cookie.IsEssential = true;
-// });
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(6);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
@@ -44,6 +45,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSession();
 
 app.MapControllers();
 
