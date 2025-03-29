@@ -70,7 +70,7 @@ namespace webapp.Controllers
         }
 
         [HttpPost]
-         [Route("add")]
+        [Route("add")]
         public async Task<ActionResult> CreateSingleOrderLine([FromForm] CreateDTO.OrderDetail orderDto, IHttpContextAccessor httpContextAccessor)
         {
             var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
@@ -89,25 +89,6 @@ namespace webapp.Controllers
                 Price = orderDto.Price, // lay tu giao dien
                 Amount = (decimal)(orderDto.Quantity * orderDto.Price) // tu dong
             };
-
-            // var getCurrentDateTime = DateTime.UtcNow.Date;
-            // Random rnd = new Random();
-            // var randomNumber  = rnd.Next(11111, 99999);  
-            // var getOrderNo = "ORDERNO" + randomNumber.ToString();
-
-            // var oderMaster = new OrderMaster
-            // {
-            //     OrderDate = getCurrentDateTime,
-            //     OrderNo = getOrderNo,
-            //     CustomerID = orderDto.CustomerID,
-            //     TotalAmount = orderDto.TotalAmount,
-            //     DivSubID = divSubId
-            // };
-
-            // _context.OrderMasters.Add(oderMaster);
-            // await _context.SaveChangesAsync();
-
-            // orderDetail.OrderMasterID = oderMaster.OrderMasterID;
 
             _context.OrderDetails.Add(orderDetail);
             await _context.SaveChangesAsync();
@@ -131,19 +112,6 @@ namespace webapp.Controllers
             string divSubId = "0903705820";
             var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID"); // OrderMasterID
             var getCurrentDateTime = DateTime.UtcNow;
-            // var getOrderDetailData = await _context.OrderDetails
-            //             .Join(_context.OrderMasters,
-            //                 od => od.OrderMasterID,
-            //                 om => om.OrderMasterID,
-            //                 (od, om) => new 
-            //                 { 
-            //                     Quantity = od.Quantity,
-            //                     Amount = od.Amount,
-            //                     OrderMasterID = om.OrderMasterID
-            //                 }) 
-            //             .Where(a => a.OrderMasterID.ToString() == currentOrderMasterID)
-            //             // .Sum(abc => abc.Quantity)
-            //             .ToListAsync();
 
             // sum Quantity (OrderNo)
             var totalQuantity  = _context.OrderDetails
@@ -183,16 +151,7 @@ namespace webapp.Controllers
                 });
             }
 
-            // var createOrderMaster = new OrderMaster
-            // {
-            //     OrderDate = getCurrentDateTime,
-            //     OrderNo = totalQuantity,
-            //     CustomerID = orderDto.CustomerID,
-            //     TotalAmount = totalAmount,
-            //     DivSubID = divSubId
-            // };
             
-            // _context.OrderMasters.Add(createOrderMaster);
             getOrderMaster.OrderDate = getCurrentDateTime;
             getOrderMaster.OrderNo = totalQuantity;
             getOrderMaster.CustomerID = orderDto.CustomerID;
@@ -204,54 +163,12 @@ namespace webapp.Controllers
             HttpContext.Session.Remove("CurrentOrderMasterID");
 
             return Ok(new {
-                // test = getOrderDetailData,
-                // duLieuDaThem = createOrderMaster,
                 totalQuantity = totalQuantity,
                 totalAmount = totalAmount,
                 msg = "Thành công"
             });
         }
 
-        // form sua update se lay api nayf
-        // [HttpPut("update/{orderMasterId}")]
-        // public async Task<IActionResult> UpdateOrder(Guid orderMasterId, [FromForm] UpdateOrderDto updtDto)
-        // {
-        //     var checkOrderMaster = await _context.OrderMasters.FindAsync(orderMasterId);
-        //     var getCurrentDateTime = DateTime.UtcNow.Date;
-
-        //     if (orderMasterId != checkOrderMaster.OrderMasterID || checkOrderMaster == null){
-        //         return NotFound(new {
-        //             message = "Không tìm được OrderMaster"
-        //         });
-        //     }
-
-        //     // cap nhat oderMaster
-        //     checkOrderMaster.OrderNo = updtDto.OrderNo;
-        //     checkOrderMaster.TotalAmount = updtDto.TotalAmount;
-
-        //     var getOrderDetail = await _context.OrderDetails.FirstOrDefaultAsync(o => o.OrderMasterID == orderMasterId);
-           
-        //     if (getOrderDetail == null)
-        //     {
-        //         return NotFound(new {
-        //             message = "Không tìm được OrderDetail"
-        //         });
-        //     }
-        //     // cap nhat OrderDetails
-        //     getOrderDetail.ItemID = updtDto.ItemID;
-        //     getOrderDetail.Quantity = updtDto.Quantity;
-        //     getOrderDetail.Price = updtDto.Price;
-        //     // getOrderDetail.Amount = updtDto.Amount;
-        //     getOrderDetail.Amount = (decimal)(getOrderDetail.Price * getOrderDetail.Quantity);
-
-        //     await _context.SaveChangesAsync();
-
-        //     return Ok(new
-        //     {
-        //         message = "Thành công cập nhật hóa đơn",
-        //         orderMaster = checkOrderMaster,
-        //         OrderDetail = getOrderDetail
-        //     });
-        // }
+        
     }
 }

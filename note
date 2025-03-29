@@ -1,0 +1,9 @@
+OrderMasterTbl as om:
+
+	- OrderNo = { OrderDetailTbl as od: if (od.OrderMasterID = om.OrderMasterID) } -> select Quantity 
+										sau đó Quantity += Quantity
+
+	- TotalAmount = { OrderDetailTbl as od: if (od.OrderMasterID = om.OrderMasterID) } -> select Amount 
+										sau đó Amount += Amount
+
+
