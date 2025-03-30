@@ -81,7 +81,8 @@ namespace webapp.Controllers
 
         // B3:  PUT: sua: Ma hang hoa (ItemID), So luong (Quantity), Don gia (Price), Thanh tien (Amount)
         //      - ItemID  ,  Quantity  ,  Price  ,  Amount=Quantity*Price
-        [HttpPut("updateOM/{rdid}")] // rdid la rowDetailID
+        [HttpPut]
+        [Route("updateOM/{rdid}")] // rdid la rowDetailID
         public async Task<IActionResult> SaveOrderDetails(Guid rdid, [FromForm] UpdateOrderDto updtDto)
         {
             var checkOrderDetail = await _context.OrderDetails.FindAsync(rdid);
@@ -116,13 +117,15 @@ namespace webapp.Controllers
         }
 
         // B4:  PUT: update lai OrderMaster dua tren OrderMasterId cua cac OrderDetail (tuong tu route Submit ben OrderHandle controller)
-        [HttpPut("updateOM/save/{omid}")] // omid la OrderMasterId
-        public async Task<IActionResult> SaveOrderMaster(Guid omid, [FromForm] UpdateOMDto updtDto)
+        [HttpPut]
+        [Route("updateOM/save")] // omid la OrderMasterId
+        public async Task<IActionResult> SaveOrderMaster( [FromForm] UpdateOMDto updtDto)
         {
-            var getOrderMaster = await _context.OrderMasters.FindAsync(omid);
+            // var getOrderMaster = await _context.OrderMasters.FindAsync(omid);
             var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
+            var getOrderMaster = await _context.OrderMasters.FirstOrDefaultAsync(o => o.OrderMasterID.ToString() == currentOrderMasterID);
 
-            if (omid != getOrderMaster.OrderMasterID || getOrderMaster == null){
+            if (currentOrderMasterID != getOrderMaster.OrderMasterID.ToString() || getOrderMaster == null){
                 return NotFound(new {
                     message = "Dư liệu không hợp lệ"
                 });
@@ -157,9 +160,6 @@ namespace webapp.Controllers
                         .Where(a => a.OrderMasterID.ToString() == currentOrderMasterID)
                         .Sum(b => b.Amount);
 
-            // var getOrderMaster = await _context.OrderMasters.FirstOrDefaultAsync(o => o.OrderMasterID.ToString() == currentOrderMasterID);
-
-
             getOrderMaster.CustomerID = updtDto.CustomerID;
             getOrderMaster.OrderNo = totalQuantity;
             getOrderMaster.TotalAmount = totalAmount;
@@ -171,68 +171,6 @@ namespace webapp.Controllers
                 message = "Đã cập nhật toàn bộ thông tin của hóa đơn"
             });
         }
-
-            // var getOrderDetail = await _context.OrderDetails.FirstOrDefaultAsync(o => o.OrderMasterID == orderMasterId);
-           
-            // if (getOrderDetail == null)
-            // {
-            //     return NotFound(new {
-            //         message = "Không tìm được OrderDetail"
-            //     });
-            // }
-            // // cap nhat OrderDetails
-            // getOrderDetail.ItemID = updtDto.ItemID;
-            // getOrderDetail.Quantity = updtDto.Quantity;
-            // getOrderDetail.Price = updtDto.Price;
-            // // getOrderDetail.Amount = updtDto.Amount;
-            // getOrderDetail.Amount = (decimal)(getOrderDetail.Price * getOrderDetail.Quantity);
-
-
-
-
-
-        // // form sua update se lay api nayf
-        // [HttpPut("update/{orderMasterId}")]
-        // public async Task<IActionResult> UpdateOrder(Guid orderMasterId, [FromForm] UpdateOrderDto updtDto)
-        // {
-        //     var checkOrderMaster = await _context.OrderMasters.FindAsync(orderMasterId);
-        //     var getCurrentDateTime = DateTime.UtcNow.Date;
-
-        //     if (orderMasterId != checkOrderMaster.OrderMasterID || checkOrderMaster == null){
-        //         return NotFound(new {
-        //             message = "Không tìm được OrderMaster"
-        //         });
-        //     }
-
-        //     // cap nhat oderMaster
-        //     checkOrderMaster.OrderNo = updtDto.OrderNo;
-        //     checkOrderMaster.TotalAmount = updtDto.TotalAmount;
-
-        //     var getOrderDetail = await _context.OrderDetails.FirstOrDefaultAsync(o => o.OrderMasterID == orderMasterId);
-           
-        //     if (getOrderDetail == null)
-        //     {
-        //         return NotFound(new {
-        //             message = "Không tìm được OrderDetail"
-        //         });
-        //     }
-        //     // cap nhat OrderDetails
-        //     getOrderDetail.ItemID = updtDto.ItemID;
-        //     getOrderDetail.Quantity = updtDto.Quantity;
-        //     getOrderDetail.Price = updtDto.Price;
-        //     // getOrderDetail.Amount = updtDto.Amount;
-        //     getOrderDetail.Amount = (decimal)(getOrderDetail.Price * getOrderDetail.Quantity);
-
-        //     await _context.SaveChangesAsync();
-
-        //     return Ok(new
-        //     {
-        //         message = "Thành công cập nhật hóa đơn",
-        //         orderMaster = checkOrderMaster,
-        //         OrderDetail = getOrderDetail
-        //     });
-        // }
-
-        
+   
     }
 }
