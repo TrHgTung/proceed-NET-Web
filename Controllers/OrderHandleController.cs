@@ -59,13 +59,15 @@ namespace webapp.Controllers
             var currentOrderMasterID = _httpContextAccessor.HttpContext.Session;
             currentOrderMasterID.SetString("CurrentOrderMasterID", initGuid.ToString());
 
+            var checkCurrentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
+
             _context.OrderMasters.Add(initOrderMaster);
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 orderMaster = initOrderMaster,
-                message = "Đã khởi tạo OrderMaster"
+                message = "Đã khởi tạo OrderMaster có id = " + checkCurrentOrderMasterID
             });
         }
 
@@ -74,6 +76,8 @@ namespace webapp.Controllers
         public async Task<ActionResult> CreateSingleOrderLine([FromForm] CreateDTO.OrderDetail orderDto, IHttpContextAccessor httpContextAccessor)
         {
             var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
+            Console.WriteLine("Session CurrentOrderMasterID: " + currentOrderMasterID);
+
             if (currentOrderMasterID == null)
             {
                 return BadRequest("Có lỗi hệ thống");
@@ -82,9 +86,10 @@ namespace webapp.Controllers
 
             var orderDetail = new OrderDetail
             {
-                OrderMasterID = Guid.Parse(currentOrderMasterID),
+                OrderMasterID = Guid.Parse(currentOrderMasterID), // default
+                // OrderMasterID = orderDto.OrderMasterID,
                 LineNumber = getLineNumber,
-                ItemID = (orderDto.ItemID), // lay tu giao dien UI
+                ItemID = orderDto.ItemID, // lay tu giao dien UI
                 Quantity = orderDto.Quantity, // lay tu giao dien
                 Price = orderDto.Price, // lay tu giao dien
                 Amount = (decimal)(orderDto.Quantity * orderDto.Price) // tu dong
@@ -95,7 +100,7 @@ namespace webapp.Controllers
 
             return Ok(new {
                 orderDetail = orderDetail,
-                // oderMaster = oderMaster,
+                currentOrderMasterID = currentOrderMasterID,
                 msg = "Đã thêm sản phẩm vào hàng chờ cua hóa đơn"
             });
         }

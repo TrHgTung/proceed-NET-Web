@@ -12,10 +12,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy(allowCors,
                       builder =>
                       {
-                          builder.WithOrigins("http://localhost:5500", "http://127.0.0.1:5500")
+                          builder
+                                .AllowAnyOrigin()
+                                // .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500", "http://127.0.0.1:3000", "http://127.0.0.1:3000")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
-                                .AllowCredentials();
+                                // .AllowCredentials()
+                                ;
                       });
 });
 
@@ -50,6 +53,8 @@ app.UseCors(allowCors);
 app.UseHttpsRedirection();
 
 app.UseSession();
+
+app.UseRouting();
 
 app.MapControllers();
 
