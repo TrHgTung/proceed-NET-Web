@@ -7,3 +7,4 @@ OrderMasterTbl as om:
 										sau đó Amount += Amount
 
 
+-- OrderDetail chỉ cho phép 1 ItemID duy nhất (ko trùng nhau)

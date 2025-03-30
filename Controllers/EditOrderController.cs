@@ -46,7 +46,7 @@ namespace webapp.Controllers
         // B2:  GET: hien thi toan bo OrderDetail dua tren OrderMaster (OrderMasterId)
         [HttpGet]
         [Route("/selectOM/{omid}")]
-        public async Task<ActionResult<IEnumerable<OrderMaster>>> GetOM(Guid omid)
+        public async Task<ActionResult<IEnumerable<OrderMaster>>> GetDetails_OM(Guid omid)
         {
             // var getAllOrderDetails = await _context.OrderDetails.ToListAsync();
             var currentOrderMasterID = _httpContextAccessor.HttpContext.Session;
@@ -66,7 +66,7 @@ namespace webapp.Controllers
                                 od.Amount,
                                 od.OrderMasterID
                             }) 
-                        .Where(a => a.OrderMasterID.ToString() == currentOrderMasterID.ToString())
+                        .Where(a => a.OrderMasterID.ToString() == omid.ToString())
                         .ToListAsync();
 
             if(getAllOrderDetails == null || !getAllOrderDetails.Any()){
@@ -81,11 +81,111 @@ namespace webapp.Controllers
 
         // B3:  PUT: sua: Ma hang hoa (ItemID), So luong (Quantity), Don gia (Price), Thanh tien (Amount)
         //      - ItemID  ,  Quantity  ,  Price  ,  Amount=Quantity*Price
+        [HttpPut("updateOM/{rdid}")] // rdid la rowDetailID
+        public async Task<IActionResult> SaveOrderDetails(Guid rdid, [FromForm] UpdateOrderDto updtDto)
+        {
+            var checkOrderDetail = await _context.OrderDetails.FindAsync(rdid);
+
+            if (rdid != checkOrderDetail.RowDetailID || checkOrderDetail == null){
+                return NotFound(new {
+                    message = "Dư liệu không hợp lệ"
+                });
+            }
+
+            // var getAllOrderDetails  = await _context.OrderDetails
+            //             .Where(od => od.OrderMasterID.ToString() == omid.ToString())
+            //             .ToListAsync();
+
+            // if(getAllOrderDetails == null || !getAllOrderDetails.Any()){
+            //     return NotFound(new {
+            //         message = "Không có dữ liệu"
+            //     });
+            // }
+
+            checkOrderDetail.ItemID = updtDto.ItemID;
+            checkOrderDetail.Quantity = updtDto.Quantity;
+            checkOrderDetail.Price = updtDto.Price;
+            checkOrderDetail.Amount = (decimal)(updtDto.Quantity * updtDto.Price);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Đã sửa lại dữ liệu"
+            });
+        }
 
         // B4:  PUT: update lai OrderMaster dua tren OrderMasterId cua cac OrderDetail (tuong tu route Submit ben OrderHandle controller)
-        
+        [HttpPut("updateOM/save/{omid}")] // omid la OrderMasterId
+        public async Task<IActionResult> SaveOrderMaster(Guid omid, [FromForm] UpdateOMDto updtDto)
+        {
+            var getOrderMaster = await _context.OrderMasters.FindAsync(omid);
+            var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
+
+            if (omid != getOrderMaster.OrderMasterID || getOrderMaster == null){
+                return NotFound(new {
+                    message = "Dư liệu không hợp lệ"
+                });
+            }
+
+            // sum Quantity (OrderNo)
+            var totalQuantity  = _context.OrderDetails
+                        .Join(_context.OrderMasters,
+                            od => od.OrderMasterID,
+                            om => om.OrderMasterID,
+                            (od, om) => new 
+                            { 
+                                Quantity = od.Quantity,
+                                Amount = od.Amount,
+                                OrderMasterID = om.OrderMasterID
+                            }) 
+                        .Where(a => a.OrderMasterID.ToString() == currentOrderMasterID)
+                        .Sum(b => b.Quantity)
+                        .ToString();
+
+            // sum cua Amount (TotalAmount)
+            var totalAmount = _context.OrderDetails
+                        .Join(_context.OrderMasters,
+                            od => od.OrderMasterID,
+                            om => om.OrderMasterID,
+                            (od, om) => new 
+                            { 
+                                Quantity = od.Quantity,
+                                Amount = od.Amount,
+                                OrderMasterID = om.OrderMasterID
+                            }) 
+                        .Where(a => a.OrderMasterID.ToString() == currentOrderMasterID)
+                        .Sum(b => b.Amount);
+
+            // var getOrderMaster = await _context.OrderMasters.FirstOrDefaultAsync(o => o.OrderMasterID.ToString() == currentOrderMasterID);
 
 
+            getOrderMaster.CustomerID = updtDto.CustomerID;
+            getOrderMaster.OrderNo = totalQuantity;
+            getOrderMaster.TotalAmount = totalAmount;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Đã cập nhật toàn bộ thông tin của hóa đơn"
+            });
+        }
+
+            // var getOrderDetail = await _context.OrderDetails.FirstOrDefaultAsync(o => o.OrderMasterID == orderMasterId);
+           
+            // if (getOrderDetail == null)
+            // {
+            //     return NotFound(new {
+            //         message = "Không tìm được OrderDetail"
+            //     });
+            // }
+            // // cap nhat OrderDetails
+            // getOrderDetail.ItemID = updtDto.ItemID;
+            // getOrderDetail.Quantity = updtDto.Quantity;
+            // getOrderDetail.Price = updtDto.Price;
+            // // getOrderDetail.Amount = updtDto.Amount;
+            // getOrderDetail.Amount = (decimal)(getOrderDetail.Price * getOrderDetail.Quantity);
 
 
 
