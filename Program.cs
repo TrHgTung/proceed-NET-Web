@@ -13,11 +13,11 @@ builder.Services.AddCors(options =>
                       builder =>
                       {
                           builder
-                                .AllowAnyOrigin()
-                                // .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500", "http://127.0.0.1:3000", "http://127.0.0.1:3000")
+                                // .AllowAnyOrigin()
+                                .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500", "http://127.0.0.1:3000", "http://127.0.0.1:3000")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
-                                // .AllowCredentials()
+                                .AllowCredentials()
                                 ;
                       });
 });
@@ -28,6 +28,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(6);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    // options.Cookie.SameSite = SameSiteMode.None;
 });
 
 builder.Services.AddControllers();

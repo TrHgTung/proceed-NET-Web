@@ -75,7 +75,7 @@ namespace webapp.Controllers
         [Route("add")]
         public async Task<ActionResult> CreateSingleOrderLine([FromForm] CreateDTO.OrderDetail orderDto, IHttpContextAccessor httpContextAccessor)
         {
-            var currentOrderMasterID = HttpContext.Session.GetString("CurrentOrderMasterID");
+            var currentOrderMasterID = _httpContextAccessor.HttpContext.Session.GetString("CurrentOrderMasterID");
             Console.WriteLine("Session CurrentOrderMasterID: " + currentOrderMasterID);
 
             if (currentOrderMasterID == null)
